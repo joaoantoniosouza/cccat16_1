@@ -1,3 +1,4 @@
+//main, framework and driver, interface adapter
 import express from "express";
 import { GetAccount } from "../application/get-account";
 import { Signup } from "../application/signup";
@@ -26,4 +27,5 @@ app.get("/accounts/:accountId", async function (req, res) {
   res.json(account);
 });
 
+// server
 app.listen(3000);

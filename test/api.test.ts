@@ -45,38 +45,3 @@ test("Não deve criar uma conta para o passageiro se o email for inválido", asy
   const outputSignup = responseSignup.data;
   expect(outputSignup.message).toBe("Invalid email");
 });
-
-test("Não deve criar uma conta para o passageiro se o cpf for inválido", async function () {
-  const input = {
-    name: "John Doe",
-    email: `john.doe${Math.random()}@gmail.com`,
-    cpf: "877482400",
-    carPlate: "AAA9999",
-    isPassenger: false,
-    isDriver: true,
-  };
-  const responseSignup = await axios.post(
-    "http://localhost:3000/signup",
-    input
-  );
-  expect(responseSignup.status).toBe(422);
-  const outputSignup = responseSignup.data;
-  expect(outputSignup.message).toBe("Invalid CPF");
-});
-
-test("Não deve criar uma conta para o passageiro se o email já existe", async function () {
-  const input = {
-    name: "John Doe",
-    email: `john.doe${Math.random()}@gmail.com`,
-    cpf: "87748248800",
-    isPassenger: true,
-  };
-  await axios.post("http://localhost:3000/signup", input);
-  const responseSignup = await axios.post(
-    "http://localhost:3000/signup",
-    input
-  );
-  expect(responseSignup.status).toBe(422);
-  const outputSignup = responseSignup.data;
-  expect(outputSignup.message).toBe("Account already exists");
-});

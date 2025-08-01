@@ -1,7 +1,11 @@
 import { GetAccount } from "../src/application/get-account";
 import { Signup } from "../src/application/signup";
-import { AccountDAOMemory } from "../src/resource/account.dao";
+import {
+  AccountDAODatabase,
+  AccountDAOMemory,
+} from "../src/resource/account.dao";
 import { MailerGatewayMemory } from "../src/resource/mailer.gateway";
+import sinon from "sinon";
 
 let signup: Signup;
 let getAccount: GetAccount;
@@ -114,4 +118,86 @@ test("Não deve criar uma conta para o passageiro se o email já existe", async 
   await expect(() => signup.execute(input)).rejects.toThrow(
     new Error("Account already exists")
   );
+});
+
+test("Deve criar uma conta para o passageiro com stub", async function () {
+  const input = {
+    name: "John Doe",
+    email: `john.doe${Math.random()}@gmail.com`,
+    cpf: "87748248800",
+    isPassenger: true,
+    isDriver: false,
+  };
+  const saveAccountStub = sinon
+    .stub(AccountDAODatabase.prototype, "save")
+    .resolves();
+  const getAccountByEmailStub = sinon
+    .stub(AccountDAODatabase.prototype, "getByEmail")
+    .resolves(null);
+  const getAccountByIdStub = sinon
+    .stub(AccountDAODatabase.prototype, "getById")
+    .resolves(input);
+  const accountDAO = new AccountDAODatabase();
+  const mailerGateway = new MailerGatewayMemory();
+  const signup = new Signup(accountDAO, mailerGateway);
+  const getAccount = new GetAccount(accountDAO);
+  const outputSignup = await signup.execute(input);
+  expect(outputSignup.accountId).toBeDefined();
+  const outputGetAccount = await getAccount.execute(outputSignup.accountId);
+  expect(outputGetAccount.name).toBe(input.name);
+  expect(outputGetAccount.email).toBe(input.email);
+  expect(outputGetAccount.isPassenger).toBe(input.isPassenger);
+  expect(outputGetAccount.isDriver).toBe(input.isDriver);
+  saveAccountStub.restore();
+  getAccountByEmailStub.restore();
+  getAccountByIdStub.restore();
+});
+
+test("Deve criar uma conta para o passageiro com spy", async function () {
+  const input = {
+    name: "John Doe",
+    email: `john.doe${Math.random()}@gmail.com`,
+    cpf: "87748248800",
+    isPassenger: true,
+    isDriver: false,
+  };
+  const sendSpy = sinon.spy(MailerGatewayMemory.prototype, "send");
+  const accountDAO = new AccountDAOMemory();
+  const mailerGateway = new MailerGatewayMemory();
+  const signup = new Signup(accountDAO, mailerGateway);
+  const getAccount = new GetAccount(accountDAO);
+  const outputSignup = await signup.execute(input);
+  expect(outputSignup.accountId).toBeDefined();
+  const outputGetAccount = await getAccount.execute(outputSignup.accountId);
+  expect(outputGetAccount.name).toBe(input.name);
+  expect(outputGetAccount.email).toBe(input.email);
+  expect(outputGetAccount.isPassenger).toBe(input.isPassenger);
+  expect(outputGetAccount.isDriver).toBe(input.isDriver);
+  expect(sendSpy.calledWith(input.email, "Welcome!", "")).toBe(true);
+  sendSpy.restore();
+});
+
+test("Deve criar uma conta para o passageiro com spy", async function () {
+  const input = {
+    name: "John Doe",
+    email: `john.doe${Math.random()}@gmail.com`,
+    cpf: "87748248800",
+    isPassenger: true,
+    isDriver: false,
+  };
+  const sendMock = sinon.mock(MailerGatewayMemory.prototype);
+  sendMock.expects("send").withArgs(input.email, "Welcome!", "").once();
+  const accountDAO = new AccountDAOMemory();
+  const mailerGateway = new MailerGatewayMemory();
+  const signup = new Signup(accountDAO, mailerGateway);
+  const getAccount = new GetAccount(accountDAO);
+  const outputSignup = await signup.execute(input);
+  expect(outputSignup.accountId).toBeDefined();
+  const outputGetAccount = await getAccount.execute(outputSignup.accountId);
+  expect(outputGetAccount.name).toBe(input.name);
+  expect(outputGetAccount.email).toBe(input.email);
+  expect(outputGetAccount.isPassenger).toBe(input.isPassenger);
+  expect(outputGetAccount.isDriver).toBe(input.isDriver);
+  sendMock.verify();
+  sendMock.restore();
 });
