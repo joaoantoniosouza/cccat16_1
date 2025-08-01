@@ -1,3 +1,4 @@
+// use case
 import { AccountDAO } from "../resource/account.dao";
 
 export class GetAccount {
