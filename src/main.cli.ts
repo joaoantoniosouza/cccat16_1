@@ -1,7 +1,7 @@
 //main, framework and driver, interface adapter
-import { Signup } from "../application/signup";
-import { AccountDAOMemory } from "../resource/account.dao";
-import { MailerGatewayMemory } from "../resource/mailer.gateway";
+import { Signup } from "./application/usecase/signup";
+import { AccountRepositoryMemory } from "./infra/repository/account.repository";
+import { MailerGatewayMemory } from "./infra/gateway/mailer.gateway";
 
 let input: any = {};
 process.stdin.on("data", async function (chunk) {
@@ -16,9 +16,9 @@ process.stdin.on("data", async function (chunk) {
     input.cpf = command.replace("cpf", "");
   }
   if (command.startsWith("signup")) {
-    const accountDAO = new AccountDAOMemory();
+    const accountRepository = new AccountRepositoryMemory();
     const mailerGateway = new MailerGatewayMemory();
-    const signup = new Signup(accountDAO, mailerGateway);
+    const signup = new Signup(accountRepository, mailerGateway);
     const output = await signup.execute(input);
     console.log(output);
   }

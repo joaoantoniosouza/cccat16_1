@@ -1,42 +1,48 @@
-import { AccountDAODatabase } from "../src/resource/account.dao";
+import { Account } from "../src/domain/account";
+import { PgPromiseAdapter } from "../src/infra/database/database-connection";
+import { AccountRepositoryDatabase } from "../src/infra/repository/account.repository";
 import crypto from "crypto";
 
 test("Deve salvar um resgistro na tabela account e consultar por id", async function () {
-  const accountDAO = new AccountDAODatabase();
-  const account = {
-    accountId: crypto.randomUUID(),
-    name: "John Doe",
-    email: `john.doe${Math.random()}@gmail.com`,
-    cpf: "87748248800",
-    isPassenger: true,
-    isDriver: false,
-  };
-  await accountDAO.save(account);
-  const savedAccount = await accountDAO.getById(account.accountId);
-  expect(savedAccount.account_id).toBe(account.accountId);
-  expect(savedAccount.name).toBe(account.name);
-  expect(savedAccount.email).toBe(account.email);
-  expect(savedAccount.cpf).toBe(account.cpf);
-  expect(savedAccount.is_passenger).toBe(account.isPassenger);
-  expect(savedAccount.is_driver).toBe(account.isDriver);
+  const databaseConnection = new PgPromiseAdapter();
+  const accountRepository = new AccountRepositoryDatabase(databaseConnection);
+  const account = Account.create(
+    "John Doe",
+    `john.doe${Math.random()}@gmail.com`,
+    "87748248800",
+    "",
+    true,
+    false
+  );
+  await accountRepository.save(account);
+  const savedAccount = await accountRepository.getById(account.accountId);
+  expect(savedAccount?.accountId).toBe(account.accountId);
+  expect(savedAccount?.name).toBe(account.name);
+  expect(savedAccount?.email).toBe(account.email);
+  expect(savedAccount?.cpf).toBe(account.cpf);
+  expect(savedAccount?.isPassenger).toBe(account.isPassenger);
+  expect(savedAccount?.isDriver).toBe(account.isDriver);
+  await databaseConnection.close();
 });
 
 test("Deve salvar um resgistro na tabela account e consultar por email", async function () {
-  const accountDAO = new AccountDAODatabase();
-  const account = {
-    accountId: crypto.randomUUID(),
-    name: "John Doe",
-    email: `john.doe${Math.random()}@gmail.com`,
-    cpf: "87748248800",
-    isPassenger: true,
-    isDriver: false,
-  };
-  await accountDAO.save(account);
-  const savedAccount = await accountDAO.getByEmail(account.email);
-  expect(savedAccount.account_id).toBe(account.accountId);
-  expect(savedAccount.name).toBe(account.name);
-  expect(savedAccount.email).toBe(account.email);
-  expect(savedAccount.cpf).toBe(account.cpf);
-  expect(savedAccount.is_passenger).toBe(account.isPassenger);
-  expect(savedAccount.is_driver).toBe(account.isDriver);
+  const databaseConnection = new PgPromiseAdapter();
+  const accountRepository = new AccountRepositoryDatabase(databaseConnection);
+  const account = Account.create(
+    "John Doe",
+    `john.doe${Math.random()}@gmail.com`,
+    "87748248800",
+    "",
+    true,
+    false
+  );
+  await accountRepository.save(account);
+  const savedAccount = await accountRepository.getByEmail(account.email);
+  expect(savedAccount?.accountId).toBe(account.accountId);
+  expect(savedAccount?.name).toBe(account.name);
+  expect(savedAccount?.email).toBe(account.email);
+  expect(savedAccount?.cpf).toBe(account.cpf);
+  expect(savedAccount?.isPassenger).toBe(account.isPassenger);
+  expect(savedAccount?.isDriver).toBe(account.isDriver);
+  await databaseConnection.close();
 });

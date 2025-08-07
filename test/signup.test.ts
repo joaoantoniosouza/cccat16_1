@@ -1,20 +1,22 @@
-import { GetAccount } from "../src/application/get-account";
-import { Signup } from "../src/application/signup";
+import { Account } from "../src/domain/account";
+import { GetAccount } from "../src/application/usecase/get-account";
+import { Signup } from "../src/application/usecase/signup";
 import {
-  AccountDAODatabase,
-  AccountDAOMemory,
-} from "../src/resource/account.dao";
-import { MailerGatewayMemory } from "../src/resource/mailer.gateway";
+  AccountRepositoryDatabase,
+  AccountRepositoryMemory,
+} from "../src/infra/repository/account.repository";
+import { MailerGatewayMemory } from "../src/infra/gateway/mailer.gateway";
 import sinon from "sinon";
+import { PgPromiseAdapter } from "../src/infra/database/database-connection";
 
 let signup: Signup;
 let getAccount: GetAccount;
 
 beforeEach(async function () {
-  const accountDAO = new AccountDAOMemory();
+  const accountRepository = new AccountRepositoryMemory();
   const mailerGateway = new MailerGatewayMemory();
-  signup = new Signup(accountDAO, mailerGateway);
-  getAccount = new GetAccount(accountDAO);
+  signup = new Signup(accountRepository, mailerGateway);
+  getAccount = new GetAccount(accountRepository);
 });
 
 test("Deve criar uma conta para o passageiro", async function () {
@@ -129,18 +131,29 @@ test("Deve criar uma conta para o passageiro com stub", async function () {
     isDriver: false,
   };
   const saveAccountStub = sinon
-    .stub(AccountDAODatabase.prototype, "save")
+    .stub(AccountRepositoryDatabase.prototype, "save")
     .resolves();
   const getAccountByEmailStub = sinon
-    .stub(AccountDAODatabase.prototype, "getByEmail")
-    .resolves(null);
+    .stub(AccountRepositoryDatabase.prototype, "getByEmail")
+    .resolves(undefined);
   const getAccountByIdStub = sinon
-    .stub(AccountDAODatabase.prototype, "getById")
-    .resolves(input);
-  const accountDAO = new AccountDAODatabase();
+    .stub(AccountRepositoryDatabase.prototype, "getById")
+    .resolves(
+      Account.restore(
+        "",
+        input.name,
+        input.email,
+        input.cpf,
+        "",
+        input.isPassenger,
+        input.isDriver
+      )
+    );
+  const databaseConnection = new PgPromiseAdapter();
+  const accountRepository = new AccountRepositoryDatabase(databaseConnection);
   const mailerGateway = new MailerGatewayMemory();
-  const signup = new Signup(accountDAO, mailerGateway);
-  const getAccount = new GetAccount(accountDAO);
+  const signup = new Signup(accountRepository, mailerGateway);
+  const getAccount = new GetAccount(accountRepository);
   const outputSignup = await signup.execute(input);
   expect(outputSignup.accountId).toBeDefined();
   const outputGetAccount = await getAccount.execute(outputSignup.accountId);
@@ -151,6 +164,7 @@ test("Deve criar uma conta para o passageiro com stub", async function () {
   saveAccountStub.restore();
   getAccountByEmailStub.restore();
   getAccountByIdStub.restore();
+  await databaseConnection.close();
 });
 
 test("Deve criar uma conta para o passageiro com spy", async function () {
@@ -162,10 +176,10 @@ test("Deve criar uma conta para o passageiro com spy", async function () {
     isDriver: false,
   };
   const sendSpy = sinon.spy(MailerGatewayMemory.prototype, "send");
-  const accountDAO = new AccountDAOMemory();
+  const accountRepository = new AccountRepositoryMemory();
   const mailerGateway = new MailerGatewayMemory();
-  const signup = new Signup(accountDAO, mailerGateway);
-  const getAccount = new GetAccount(accountDAO);
+  const signup = new Signup(accountRepository, mailerGateway);
+  const getAccount = new GetAccount(accountRepository);
   const outputSignup = await signup.execute(input);
   expect(outputSignup.accountId).toBeDefined();
   const outputGetAccount = await getAccount.execute(outputSignup.accountId);
@@ -187,10 +201,10 @@ test("Deve criar uma conta para o passageiro com spy", async function () {
   };
   const sendMock = sinon.mock(MailerGatewayMemory.prototype);
   sendMock.expects("send").withArgs(input.email, "Welcome!", "").once();
-  const accountDAO = new AccountDAOMemory();
+  const accountRepository = new AccountRepositoryMemory();
   const mailerGateway = new MailerGatewayMemory();
-  const signup = new Signup(accountDAO, mailerGateway);
-  const getAccount = new GetAccount(accountDAO);
+  const signup = new Signup(accountRepository, mailerGateway);
+  const getAccount = new GetAccount(accountRepository);
   const outputSignup = await signup.execute(input);
   expect(outputSignup.accountId).toBeDefined();
   const outputGetAccount = await getAccount.execute(outputSignup.accountId);
