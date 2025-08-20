@@ -1,4 +1,4 @@
-import { Cpf } from "../src/domain/Cpf";
+import { Cpf } from "../src/domain/vo/Cpf";
 
 test.each(["97456321558", "71428793860", "87748248800"])(
   "Deve testar um cpf válido: %s",

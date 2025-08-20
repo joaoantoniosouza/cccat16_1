@@ -1,6 +1,5 @@
 import { AccountRepository } from "../../infra/repository/account.repository";
 import { RideRepository } from "../../infra/repository/ride.repository";
-import { Ride } from "../../domain/ride";
 
 export class AcceptRide {
   constructor(

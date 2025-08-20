@@ -1,7 +1,7 @@
 // use case
 import { AccountRepository } from "../../infra/repository/account.repository";
 import { MailerGateway } from "../../infra/gateway/mailer.gateway";
-import { Account } from "../../domain/account";
+import { Account } from "../../domain/entity/account";
 
 export class Signup {
   constructor(

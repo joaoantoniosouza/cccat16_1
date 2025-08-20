@@ -1,9 +1,9 @@
 // entity
 import crypto from "crypto";
-import { Name } from "./Name";
-import { Email } from "./Email";
-import { Cpf } from "./Cpf";
-import { CarPlate } from "./CarPlate";
+import { CarPlate } from "../vo/CarPlate";
+import { Cpf } from "../vo/Cpf";
+import { Email } from "../vo/Email";
+import { Name } from "../vo/Name";
 
 export class Account {
   private constructor(

@@ -1,6 +1,6 @@
 // interface adapter
 
-import { Account } from "../../domain/account";
+import { Account } from "../../domain/entity/account";
 import { DatabaseConnection } from "../database/database-connection";
 
 // Drive/Resource Port

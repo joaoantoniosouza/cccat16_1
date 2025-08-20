@@ -1,4 +1,3 @@
-import { Account } from "../src/domain/account";
 import { GetAccount } from "../src/application/usecase/get-account";
 import { Signup } from "../src/application/usecase/signup";
 import {
@@ -8,6 +7,7 @@ import {
 import { MailerGatewayMemory } from "../src/infra/gateway/mailer.gateway";
 import sinon from "sinon";
 import { PgPromiseAdapter } from "../src/infra/database/database-connection";
+import { Account } from "../src/domain/entity/account";
 
 let signup: Signup;
 let getAccount: GetAccount;
