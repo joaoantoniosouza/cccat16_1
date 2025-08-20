@@ -1,7 +1,6 @@
 import { Account } from "../src/domain/account";
 import { PgPromiseAdapter } from "../src/infra/database/database-connection";
 import { AccountRepositoryDatabase } from "../src/infra/repository/account.repository";
-import crypto from "crypto";
 
 test("Deve salvar um resgistro na tabela account e consultar por id", async function () {
   const databaseConnection = new PgPromiseAdapter();

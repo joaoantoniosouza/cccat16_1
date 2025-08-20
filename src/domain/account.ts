@@ -1,27 +1,39 @@
 // entity
 import crypto from "crypto";
-import { validate } from "./validateCpf";
+import { Name } from "./Name";
+import { Email } from "./Email";
+import { Cpf } from "./Cpf";
+import { CarPlate } from "./CarPlate";
 
 export class Account {
   private constructor(
     readonly accountId: string,
-    readonly name: string,
-    readonly email: string,
-    readonly cpf: string,
-    readonly carPlate: string,
+    private _name: Name,
+    private _email: Email,
+    private _cpf: Cpf,
+    private _carPlate: CarPlate,
     readonly isPassenger: boolean,
     readonly isDriver: boolean
-  ) {
-    if (!this.name.match(/[a-zA-Z] [a-zA-Z]+/)) throw new Error("Invalid name");
-    if (!this.email.match(/^(.+)@(.+)$/)) throw new Error("Invalid email");
-    if (!validate(this.cpf)) throw new Error("Invalid CPF");
-    if (
-      this.isDriver &&
-      this.carPlate &&
-      !this.carPlate.match(/[A-Z]{3}[0-9]{4}/)
-    ) {
-      throw new Error("Invalid car plate");
-    }
+  ) {}
+
+  set name(value: string) {
+    this._name = new Name(value);
+  }
+
+  get name() {
+    return this._name.value;
+  }
+
+  get email() {
+    return this._email.value;
+  }
+
+  get cpf() {
+    return this._cpf.value;
+  }
+
+  get carPlate() {
+    return this._carPlate.value;
   }
 
   static create(
@@ -35,10 +47,10 @@ export class Account {
     const accountId = crypto.randomUUID();
     return new Account(
       accountId,
-      name,
-      email,
-      cpf,
-      carPlate,
+      new Name(name),
+      new Email(email),
+      new Cpf(cpf),
+      new CarPlate(carPlate),
       isPassenger,
       isDriver
     );
@@ -55,10 +67,10 @@ export class Account {
   ) {
     return new Account(
       accountId,
-      name,
-      email,
-      cpf,
-      carPlate,
+      new Name(name),
+      new Email(email),
+      new Cpf(cpf),
+      new CarPlate(carPlate),
       isPassenger,
       isDriver
     );

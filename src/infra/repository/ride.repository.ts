@@ -6,6 +6,7 @@ export interface RideRepository {
   save(ride: Ride): Promise<void>;
   getById(rideId: string): Promise<Ride>;
   hasActiveRideByPassengerId(passengerId: string): Promise<boolean>;
+  update(ride: Ride): Promise<void>;
 }
 
 export class RideRepositoryDatabase implements RideRepository {
@@ -17,7 +18,7 @@ export class RideRepositoryDatabase implements RideRepository {
       [
         ride.rideId,
         ride.passengerId,
-        ride.status,
+        ride.getStatus(),
         ride.fromLat,
         ride.fromLong,
         ride.toLat,
@@ -35,6 +36,7 @@ export class RideRepositoryDatabase implements RideRepository {
     return Ride.restore(
       rideData.ride_id,
       rideData.passenger_id,
+      rideData.driver_id,
       parseFloat(rideData.from_lat),
       parseFloat(rideData.from_long),
       parseFloat(rideData.to_lat),
@@ -50,5 +52,12 @@ export class RideRepositoryDatabase implements RideRepository {
       [passengerId]
     );
     return Boolean(rideData);
+  }
+
+  async update(ride: Ride): Promise<void> {
+    await this.databaseConnection.query(
+      "update cccat16.ride set status = $1, driver_id = $2 where ride_id = $3",
+      [ride.getStatus(), ride.driverId, ride.rideId]
+    );
   }
 }

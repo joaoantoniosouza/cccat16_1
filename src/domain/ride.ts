@@ -1,16 +1,21 @@
 import crypto from "crypto";
+import { Coord } from "./Coord";
+import { Segment } from "./Segment";
+import RideStatus, { RequestedStatus, RideStatusFactory } from "./RideStatus";
 
 export class Ride {
+  status: RideStatus;
+
   private constructor(
     readonly rideId: string,
     readonly passengerId: string,
-    readonly fromLat: number,
-    readonly fromLong: number,
-    readonly toLat: number,
-    readonly toLong: number,
-    readonly status: string,
+    private _driverId: string,
+    private segment: Segment,
+    status: string,
     readonly date: Date
-  ) {}
+  ) {
+    this.status = RideStatusFactory.create(this, status);
+  }
 
   static create(
     passengerId: string,
@@ -20,15 +25,13 @@ export class Ride {
     toLong: number
   ) {
     const rideId = crypto.randomUUID();
-    const status = "requested";
     const date = new Date();
+    const status = "requested";
     return new Ride(
       rideId,
       passengerId,
-      fromLat,
-      fromLong,
-      toLat,
-      toLong,
+      "",
+      new Segment(new Coord(fromLat, fromLong), new Coord(toLat, toLong)),
       status,
       date
     );
@@ -37,6 +40,7 @@ export class Ride {
   static restore(
     rideId: string,
     passengerId: string,
+    driverId: string,
     fromLat: number,
     fromLong: number,
     toLat: number,
@@ -47,12 +51,43 @@ export class Ride {
     return new Ride(
       rideId,
       passengerId,
-      fromLat,
-      fromLong,
-      toLat,
-      toLong,
+      driverId,
+      new Segment(new Coord(fromLat, fromLong), new Coord(toLat, toLong)),
       status,
       date
     );
+  }
+
+  get fromLat() {
+    return this.segment.from.lat;
+  }
+
+  get fromLong() {
+    return this.segment.from.long;
+  }
+
+  get toLat() {
+    return this.segment.to.lat;
+  }
+
+  get toLong() {
+    return this.segment.to.long;
+  }
+
+  get driverId() {
+    return this._driverId;
+  }
+
+  getStatus() {
+    return this.status.value;
+  }
+
+  accept(driverId: string) {
+    this.status.accept();
+    this._driverId = driverId;
+  }
+
+  start() {
+    this.status.start();
   }
 }
